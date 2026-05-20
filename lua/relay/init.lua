@@ -1,0 +1,102 @@
+local annotations = require("relay.annotations")
+local config = require("relay.config")
+local export = require("relay.export")
+local navigation = require("relay.navigation")
+local ui = require("relay.ui")
+local utils = require("relay.utils")
+
+local M = {}
+
+function M.setup(opts)
+  config.setup(opts)
+  ui.setup_highlights()
+  ui.keymaps()
+end
+
+function M.add(note)
+  if note then
+    local id = annotations.create_from_visual(note)
+    if id then
+      utils.notify("Annotation added")
+    end
+    return id
+  end
+
+  ui.input("Relay note: ", "", function(value)
+    local id = annotations.create_from_visual(value)
+    if id then
+      utils.notify("Annotation added")
+    end
+  end)
+end
+
+function M.edit(note)
+  local annotation = annotations.find_at_cursor()
+  if not annotation then
+    utils.notify("No Relay annotation under cursor", vim.log.levels.WARN)
+    return nil
+  end
+
+  if note then
+    annotations.update(annotation, note)
+    utils.notify("Annotation updated")
+    return annotation.id
+  end
+
+  ui.input("Relay note: ", annotation.note, function(value)
+    annotations.update(annotation, value)
+    utils.notify("Annotation updated")
+  end)
+end
+
+function M.delete()
+  local annotation = annotations.find_at_cursor()
+  if not annotation then
+    utils.notify("No Relay annotation under cursor", vim.log.levels.WARN)
+    return false
+  end
+
+  annotations.delete(annotation)
+  utils.notify("Annotation deleted")
+  return true
+end
+
+function M.clear()
+  annotations.clear()
+  utils.notify("All Relay annotations cleared")
+end
+
+function M.toggle_text()
+  local enabled = annotations.toggle_text()
+  utils.notify(enabled and "Relay inline text enabled" or "Relay inline text disabled")
+  return enabled
+end
+
+function M.next()
+  local annotation = navigation.next()
+  if not annotation then
+    utils.notify("No Relay annotations", vim.log.levels.WARN)
+  end
+  return annotation
+end
+
+function M.prev()
+  local annotation = navigation.prev()
+  if not annotation then
+    utils.notify("No Relay annotations", vim.log.levels.WARN)
+  end
+  return annotation
+end
+
+function M.export()
+  local path = export.write()
+  utils.notify("Relay context exported: " .. path)
+  return path
+end
+
+M.annotations = annotations
+M.exporter = export
+M.navigation = navigation
+
+return M
+
