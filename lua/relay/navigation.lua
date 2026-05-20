@@ -30,7 +30,34 @@ local function annotation_is_before_cursor(item, bufnr, row, col)
   return item.start_row < row or (item.start_row == row and item.start_col < col)
 end
 
+local function same_annotation(left, right)
+  return left
+    and right
+    and left.bufnr == right.bufnr
+    and left.id == right.id
+end
+
+local function current_annotation_index(items)
+  local current = annotations.find_at_cursor()
+  if not current then
+    return nil
+  end
+
+  for index, item in ipairs(items) do
+    if same_annotation(item, current) then
+      return index
+    end
+  end
+
+  return nil
+end
+
 local function next_index(items)
+  local current = current_annotation_index(items)
+  if current then
+    return current == #items and 1 or current + 1
+  end
+
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local row = cursor[1] - 1
@@ -46,6 +73,11 @@ local function next_index(items)
 end
 
 local function prev_index(items)
+  local current = current_annotation_index(items)
+  if current then
+    return current == 1 and #items or current - 1
+  end
+
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local row = cursor[1] - 1

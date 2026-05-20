@@ -83,6 +83,18 @@ annotations.create({
 }, "rename value")
 
 vim.api.nvim_set_current_buf(bufnr)
+vim.api.nvim_win_set_cursor(0, { 2, 4 })
+local next_from_inside = relay.next()
+assert_truthy(next_from_inside, "next navigation from inside an annotation should return an annotation")
+assert_equal(next_from_inside.bufnr, second, "next navigation from inside an annotation should move to the next annotation")
+
+vim.api.nvim_set_current_buf(second)
+vim.api.nvim_win_set_cursor(0, { 1, 4 })
+local prev_from_inside = relay.prev()
+assert_truthy(prev_from_inside, "previous navigation from inside an annotation should return an annotation")
+assert_equal(prev_from_inside.bufnr, bufnr, "previous navigation from inside an annotation should move to the previous annotation")
+
+vim.api.nvim_set_current_buf(bufnr)
 vim.api.nvim_win_set_cursor(0, { 1, 0 })
 local next_annotation = relay.next()
 assert_truthy(next_annotation, "next navigation should return an annotation")
