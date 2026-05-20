@@ -40,6 +40,18 @@ local function set_extmark(range, note, id)
   )
 end
 
+local function contains_position(annotation, row, col)
+  if row < annotation.start_row or row > annotation.end_row then
+    return false
+  end
+
+  if annotation.start_row ~= annotation.end_row then
+    return true
+  end
+
+  return col >= annotation.start_col and col <= annotation.end_col
+end
+
 function M.create(range, note)
   vim.validate("range", range, "table")
   vim.validate("note", note, "string")
@@ -119,12 +131,7 @@ function M.find_at_cursor()
   local col = cursor[2]
 
   for _, annotation in ipairs(M.all(bufnr)) do
-    local starts_before = row > annotation.start_row
-      or (row == annotation.start_row and col >= annotation.start_col)
-    local ends_after = row < annotation.end_row
-      or (row == annotation.end_row and col <= annotation.end_col)
-
-    if starts_before and ends_after then
+    if contains_position(annotation, row, col) then
       return annotation
     end
   end

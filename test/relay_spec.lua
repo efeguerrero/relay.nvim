@@ -62,6 +62,11 @@ local found = annotations.find_at_cursor()
 assert_truthy(found, "annotation should be found under cursor")
 assert_equal(found.note, "make greeting configurable", "cursor lookup should return metadata")
 
+vim.api.nvim_win_set_cursor(0, { 3, 80 })
+local found_by_line = annotations.find_at_cursor()
+assert_truthy(found_by_line, "multiline annotation should be found by line even when cursor is past end_col")
+assert_equal(found_by_line.id, id, "line-based lookup should find the multiline annotation")
+
 relay.edit("return a table")
 assert_equal(annotations.all(bufnr)[1].note, "return a table", "edit should update metadata")
 
