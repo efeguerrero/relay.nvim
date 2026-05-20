@@ -14,10 +14,10 @@ function M.extmark_opts(note)
   local extmark_opts = {
     hl_group = opts.highlight_group,
     end_right_gravity = true,
-    right_gravity = false,
+    right_gravity = true,
     sign_text = opts.sign_text,
     sign_hl_group = "RelayAnnotationSign",
-    user_data = { note = note },
+    url = note,
   }
 
   if opts.show_virtual_text then
@@ -54,4 +54,3 @@ function M.keymaps()
 end
 
 return M
-

@@ -10,7 +10,6 @@ local function extmark_to_annotation(bufnr, mark)
   local row = mark[2]
   local col = mark[3]
   local details = mark[4] or {}
-  local user_data = details.user_data or {}
 
   return {
     id = id,
@@ -19,7 +18,7 @@ local function extmark_to_annotation(bufnr, mark)
     start_col = col,
     end_row = details.end_row or row,
     end_col = details.end_col or col,
-    note = user_data.note or "",
+    note = details.url or "",
   }
 end
 
@@ -27,6 +26,7 @@ local function set_extmark(range, note, id)
   local opts = ui.extmark_opts(note)
   opts.end_row = range.end_row
   opts.end_col = range.end_col
+  opts.strict = false
   if id then
     opts.id = id
   end
@@ -145,4 +145,3 @@ function M.toggle_text()
 end
 
 return M
-
