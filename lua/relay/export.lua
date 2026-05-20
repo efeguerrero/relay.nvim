@@ -60,7 +60,7 @@ end
 
 function M.write()
   utils.ensure_dir(config.options.export_dir)
-  local path = ("%s/relay-%s.md"):format(config.options.export_dir, os.date("%Y%m%d-%H%M%S"))
+  local path = ("%s/%s"):format(config.options.export_dir, config.options.export_filename)
   local file = assert(io.open(path, "w"))
   file:write(M.generate())
   file:close()

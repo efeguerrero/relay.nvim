@@ -17,6 +17,7 @@ Optional configuration:
 ```lua
 require("relay").setup({
   export_dir = vim.fn.getcwd() .. "/.relay",
+  export_filename = "context.md",
   highlight_group = "RelayAnnotation",
   show_virtual_text = false,
   sign_text = "*",
@@ -54,7 +55,7 @@ Set `keymaps = false` to skip default mappings.
 
 ## Development
 
-Exports are written to `.relay/` in the current working directory by default.
+Exports are written to `.relay/context.md` in the current working directory by default. Each export overwrites that file instead of creating timestamped markdown files.
 
 Run the headless test suite:
 

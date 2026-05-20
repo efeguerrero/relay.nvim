@@ -2,6 +2,7 @@ local M = {}
 
 M.defaults = {
   export_dir = vim.fn.getcwd() .. "/.relay",
+  export_filename = "context.md",
   highlight_group = "RelayAnnotation",
   sign_text = "*",
   show_virtual_text = false,

@@ -102,6 +102,7 @@ assert_truthy(markdown:find("other.lua:1%-1"), "export should include second buf
 
 local path = relay.export()
 assert_truthy(vim.fn.filereadable(path) == 1, "export should write a markdown file")
+assert_truthy(path:find("/tmp/context%.md$") ~= nil, "export should use the stable context filename")
 
 vim.api.nvim_set_current_buf(bufnr)
 vim.api.nvim_win_set_cursor(0, { 2, 2 })
