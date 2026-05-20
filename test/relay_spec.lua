@@ -65,9 +65,10 @@ relay.edit("return a table")
 assert_equal(annotations.all(bufnr)[1].note, "return a table", "edit should update metadata")
 
 local enabled = relay.toggle_text()
-assert_equal(enabled, true, "toggle should enable virtual text")
+assert_equal(enabled, true, "toggle should enable annotation text")
 local details = vim.api.nvim_buf_get_extmarks(bufnr, require("relay.namespace").id, 0, -1, { details = true })[1][4]
-assert_truthy(details.virt_text, "virtual text should be rendered when enabled")
+assert_truthy(details.virt_lines, "virtual lines should be rendered when annotation text is enabled")
+assert_truthy(details.virt_lines[1][1][1]:find("return a table", 1, true), "virtual lines should render the full note")
 
 local second = fresh_buffer("other.lua", {
   "local value = 1",
@@ -86,6 +87,12 @@ vim.api.nvim_win_set_cursor(0, { 1, 0 })
 local next_annotation = relay.next()
 assert_truthy(next_annotation, "next navigation should return an annotation")
 assert_equal(vim.api.nvim_get_current_buf(), bufnr, "next navigation should visit first annotation in current buffer")
+
+vim.api.nvim_set_current_buf(second)
+vim.api.nvim_win_set_cursor(0, { 1, 0 })
+local prev_annotation = relay.prev()
+assert_truthy(prev_annotation, "previous navigation should return an annotation")
+assert_equal(prev_annotation.bufnr, bufnr, "previous navigation should move to the prior buffer annotation")
 
 local markdown = exporter.generate()
 assert_truthy(markdown:find("# Relay Context", 1, true), "export should include title")

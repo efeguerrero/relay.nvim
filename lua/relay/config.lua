@@ -1,7 +1,7 @@
 local M = {}
 
 M.defaults = {
-  export_dir = vim.fn.stdpath("cache") .. "/relay",
+  export_dir = vim.fn.getcwd() .. "/.relay",
   highlight_group = "RelayAnnotation",
   sign_text = "*",
   show_virtual_text = false,
@@ -15,4 +15,3 @@ function M.setup(opts)
 end
 
 return M
-

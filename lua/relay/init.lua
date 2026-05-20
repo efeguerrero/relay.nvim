@@ -68,7 +68,7 @@ end
 
 function M.toggle_text()
   local enabled = annotations.toggle_text()
-  utils.notify(enabled and "Relay inline text enabled" or "Relay inline text disabled")
+  utils.notify(enabled and "Relay annotation text enabled" or "Relay annotation text disabled")
   return enabled
 end
 
@@ -99,4 +99,3 @@ M.exporter = export
 M.navigation = navigation
 
 return M
-

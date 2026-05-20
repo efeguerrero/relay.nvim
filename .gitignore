@@ -1,5 +1,6 @@
 nvim.log
 tmp/
+.relay/
 *.swp
 *.swo
 .DS_Store

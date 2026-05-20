@@ -14,15 +14,46 @@ local function sort_annotations(items)
   end)
 end
 
-local function current_index(items)
+local function annotation_is_after_cursor(item, bufnr, row, col)
+  if item.bufnr ~= bufnr then
+    return item.bufnr > bufnr
+  end
+
+  return item.start_row > row or (item.start_row == row and item.start_col > col)
+end
+
+local function annotation_is_before_cursor(item, bufnr, row, col)
+  if item.bufnr ~= bufnr then
+    return item.bufnr < bufnr
+  end
+
+  return item.start_row < row or (item.start_row == row and item.start_col < col)
+end
+
+local function next_index(items)
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local row = cursor[1] - 1
   local col = cursor[2]
 
   for index, item in ipairs(items) do
-    if item.bufnr == bufnr and (item.start_row > row or (item.start_row == row and item.start_col > col)) then
-      return index - 1
+    if annotation_is_after_cursor(item, bufnr, row, col) then
+      return index
+    end
+  end
+
+  return 1
+end
+
+local function prev_index(items)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local row = cursor[1] - 1
+  local col = cursor[2]
+
+  for index = #items, 1, -1 do
+    if annotation_is_before_cursor(items[index], bufnr, row, col) then
+      return index
     end
   end
 
@@ -43,11 +74,7 @@ function M.next()
   end
 
   sort_annotations(items)
-  local index = current_index(items) + 1
-  if index > #items then
-    index = 1
-  end
-
+  local index = next_index(items)
   jump(items[index])
   return items[index]
 end
@@ -59,11 +86,7 @@ function M.prev()
   end
 
   sort_annotations(items)
-  local index = current_index(items)
-  if index < 1 then
-    index = #items
-  end
-
+  local index = prev_index(items)
   jump(items[index])
   return items[index]
 end
@@ -75,4 +98,3 @@ function M.sorted()
 end
 
 return M
-

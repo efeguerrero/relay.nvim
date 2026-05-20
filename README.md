@@ -16,7 +16,7 @@ Optional configuration:
 
 ```lua
 require("relay").setup({
-  export_dir = vim.fn.stdpath("cache") .. "/relay",
+  export_dir = vim.fn.getcwd() .. "/.relay",
   highlight_group = "RelayAnnotation",
   show_virtual_text = false,
   sign_text = "*",
@@ -54,9 +54,10 @@ Set `keymaps = false` to skip default mappings.
 
 ## Development
 
+Exports are written to `.relay/` in the current working directory by default.
+
 Run the headless test suite:
 
 ```sh
 nvim --headless -u test/minimal_init.lua -i NONE -c 'luafile test/relay_spec.lua' -c 'qa'
 ```
-

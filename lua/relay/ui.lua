@@ -1,12 +1,22 @@
 local config = require("relay.config")
-local utils = require("relay.utils")
-
 local M = {}
 
 function M.setup_highlights()
   vim.api.nvim_set_hl(0, "RelayAnnotation", { link = "Visual", default = true })
   vim.api.nvim_set_hl(0, "RelayAnnotationSign", { link = "DiagnosticHint", default = true })
-  vim.api.nvim_set_hl(0, "RelayAnnotationText", { link = "Comment", default = true })
+  vim.api.nvim_set_hl(0, "RelayAnnotationText", { link = "DiagnosticInfo", default = true })
+end
+
+local function note_virtual_lines(note)
+  local lines = vim.split(note, "\n", { plain = true })
+  local virtual_lines = {}
+
+  for index, line in ipairs(lines) do
+    local prefix = index == 1 and "Relay: " or "       "
+    table.insert(virtual_lines, { { prefix .. line, "RelayAnnotationText" } })
+  end
+
+  return virtual_lines
 end
 
 function M.extmark_opts(note)
@@ -21,8 +31,9 @@ function M.extmark_opts(note)
   }
 
   if opts.show_virtual_text then
-    extmark_opts.virt_text = { { utils.first_line(note), "RelayAnnotationText" } }
-    extmark_opts.virt_text_pos = "eol"
+    extmark_opts.virt_lines = note_virtual_lines(note)
+    extmark_opts.virt_lines_above = false
+    extmark_opts.virt_lines_overflow = "scroll"
   end
 
   return extmark_opts
