@@ -94,6 +94,12 @@ function M.export()
   return path
 end
 
+function M.debug()
+  local state = navigation.debug_state()
+  print(vim.inspect(state))
+  return state
+end
+
 M.annotations = annotations
 M.exporter = export
 M.navigation = navigation

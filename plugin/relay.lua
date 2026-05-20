@@ -37,3 +37,6 @@ vim.api.nvim_create_user_command("RelayExport", function()
   relay.export()
 end, { desc = "Export Relay annotations to markdown" })
 
+vim.api.nvim_create_user_command("RelayDebug", function()
+  relay.debug()
+end, { desc = "Print Relay annotation debug state" })

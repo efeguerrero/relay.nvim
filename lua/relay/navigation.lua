@@ -50,8 +50,8 @@ local function current_buffer_items(items)
   return filtered
 end
 
-local function current_annotation_index(items)
-  local current = annotations.find_at_cursor()
+local function current_annotation_index(items, current)
+  current = current or annotations.find_at_cursor()
   if not current then
     return nil
   end
@@ -149,6 +149,30 @@ function M.sorted()
   local items = annotations.all()
   sort_annotations(items)
   return items
+end
+
+function M.debug_state()
+  local items = navigation_items(annotations.all())
+  sort_annotations(items)
+
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local current = annotations.find_at_cursor()
+  local current_index = current_annotation_index(items, current)
+  local next = #items > 0 and items[next_index(items)] or nil
+  local prev = #items > 0 and items[prev_index(items)] or nil
+
+  return {
+    bufnr = vim.api.nvim_get_current_buf(),
+    cursor = {
+      row = cursor[1] - 1,
+      col = cursor[2],
+    },
+    current = current,
+    current_index = current_index,
+    next = next,
+    prev = prev,
+    items = items,
+  }
 end
 
 return M
