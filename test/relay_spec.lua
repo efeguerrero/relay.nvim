@@ -74,6 +74,7 @@ local enabled = relay.toggle_text()
 assert_equal(enabled, true, "toggle should enable annotation text")
 local details = vim.api.nvim_buf_get_extmarks(bufnr, require("relay.namespace").id, 0, -1, { details = true })[1][4]
 assert_truthy(details.virt_lines, "virtual lines should be rendered when annotation text is enabled")
+assert_equal(details.virt_lines_above, true, "annotation text should render above the annotated range")
 assert_truthy(details.virt_lines[1][1][1]:find("return a table", 1, true), "virtual lines should render the full note")
 
 local second = fresh_buffer("other.lua", {

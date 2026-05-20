@@ -1,10 +1,33 @@
 local config = require("relay.config")
 local M = {}
 
+local function get_hl(name)
+  local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
+  if ok then
+    return hl
+  end
+
+  return {}
+end
+
+local function relay_background()
+  local visual = get_hl("Visual")
+  if visual.bg then
+    return visual.bg
+  end
+
+  local cursorline = get_hl("CursorLine")
+  return cursorline.bg
+end
+
 function M.setup_highlights()
-  vim.api.nvim_set_hl(0, "RelayAnnotation", { link = "Visual", default = true })
-  vim.api.nvim_set_hl(0, "RelayAnnotationSign", { link = "DiagnosticHint", default = true })
-  vim.api.nvim_set_hl(0, "RelayAnnotationText", { link = "DiagnosticInfo", default = true })
+  local bg = relay_background()
+  local diagnostic = get_hl("DiagnosticInfo")
+  local hint = get_hl("DiagnosticHint")
+
+  vim.api.nvim_set_hl(0, "RelayAnnotation", { bg = bg, default = true })
+  vim.api.nvim_set_hl(0, "RelayAnnotationSign", { fg = hint.fg, bg = bg, default = true })
+  vim.api.nvim_set_hl(0, "RelayAnnotationText", { fg = diagnostic.fg, bg = bg, italic = true, default = true })
 end
 
 local function note_virtual_lines(note)
@@ -32,7 +55,7 @@ function M.extmark_opts(note)
 
   if opts.show_virtual_text then
     extmark_opts.virt_lines = note_virtual_lines(note)
-    extmark_opts.virt_lines_above = false
+    extmark_opts.virt_lines_above = true
     extmark_opts.virt_lines_overflow = "scroll"
   end
 
