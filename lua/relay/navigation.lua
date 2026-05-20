@@ -37,6 +37,19 @@ local function same_annotation(left, right)
     and left.id == right.id
 end
 
+local function current_buffer_items(items)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local filtered = {}
+
+  for _, item in ipairs(items) do
+    if item.bufnr == bufnr then
+      table.insert(filtered, item)
+    end
+  end
+
+  return filtered
+end
+
 local function current_annotation_index(items)
   local current = annotations.find_at_cursor()
   if not current then
@@ -50,6 +63,15 @@ local function current_annotation_index(items)
   end
 
   return nil
+end
+
+local function navigation_items(items)
+  local buffer_items = current_buffer_items(items)
+  if #buffer_items > 0 then
+    return buffer_items
+  end
+
+  return items
 end
 
 local function next_index(items)
@@ -100,7 +122,7 @@ local function jump(annotation)
 end
 
 function M.next()
-  local items = annotations.all()
+  local items = navigation_items(annotations.all())
   if #items == 0 then
     return nil
   end
@@ -112,7 +134,7 @@ function M.next()
 end
 
 function M.prev()
-  local items = annotations.all()
+  local items = navigation_items(annotations.all())
   if #items == 0 then
     return nil
   end

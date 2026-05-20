@@ -36,6 +36,7 @@ local bufnr = fresh_buffer("fixture.lua", {
   "local function greet(name)",
   "  return 'hello ' .. name",
   "end",
+  "return greet('relay')",
 }, "lua")
 
 local id = annotations.create({
@@ -82,17 +83,30 @@ annotations.create({
   end_col = 13,
 }, "rename value")
 
+local third_id = annotations.create({
+  bufnr = bufnr,
+  start_row = 3,
+  start_col = 0,
+  end_row = 3,
+  end_col = 19,
+}, "check ending")
+
 vim.api.nvim_set_current_buf(bufnr)
 vim.api.nvim_win_set_cursor(0, { 2, 4 })
 local next_from_inside = relay.next()
 assert_truthy(next_from_inside, "next navigation from inside an annotation should return an annotation")
-assert_equal(next_from_inside.bufnr, second, "next navigation from inside an annotation should move to the next annotation")
+assert_equal(next_from_inside.id, third_id, "next navigation from inside an annotation should move to the next annotation in the current buffer")
+
+vim.api.nvim_win_set_cursor(0, { 4, 1 })
+local prev_from_inside_same_buffer = relay.prev()
+assert_truthy(prev_from_inside_same_buffer, "previous navigation from inside a same-buffer annotation should return an annotation")
+assert_equal(prev_from_inside_same_buffer.id, id, "previous navigation from inside an annotation should move to the previous annotation in the current buffer")
 
 vim.api.nvim_set_current_buf(second)
 vim.api.nvim_win_set_cursor(0, { 1, 4 })
 local prev_from_inside = relay.prev()
 assert_truthy(prev_from_inside, "previous navigation from inside an annotation should return an annotation")
-assert_equal(prev_from_inside.bufnr, bufnr, "previous navigation from inside an annotation should move to the previous annotation")
+assert_equal(prev_from_inside.bufnr, second, "previous navigation with one current-buffer annotation should stay in the current buffer")
 
 vim.api.nvim_set_current_buf(bufnr)
 vim.api.nvim_win_set_cursor(0, { 1, 0 })
@@ -104,7 +118,7 @@ vim.api.nvim_set_current_buf(second)
 vim.api.nvim_win_set_cursor(0, { 1, 0 })
 local prev_annotation = relay.prev()
 assert_truthy(prev_annotation, "previous navigation should return an annotation")
-assert_equal(prev_annotation.bufnr, bufnr, "previous navigation should move to the prior buffer annotation")
+assert_equal(prev_annotation.bufnr, second, "previous navigation should prefer annotations in the current buffer")
 
 local markdown = exporter.generate()
 assert_truthy(markdown:find("# Relay Context", 1, true), "export should include title")
@@ -119,7 +133,7 @@ assert_truthy(path:find("/tmp/context%.md$") ~= nil, "export should use the stab
 vim.api.nvim_set_current_buf(bufnr)
 vim.api.nvim_win_set_cursor(0, { 2, 2 })
 assert_equal(relay.delete(), true, "delete should remove annotation under cursor")
-assert_equal(#annotations.all(bufnr), 0, "annotation should be deleted")
+assert_equal(#annotations.all(bufnr), 1, "annotation under cursor should be deleted")
 
 relay.clear()
 assert_equal(#annotations.all(), 0, "clear should remove every annotation")
