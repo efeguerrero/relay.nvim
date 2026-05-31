@@ -70,6 +70,7 @@ vim.wait(100, function()
   return cancelled_note
 end)
 assert_equal(cancelled_note, true, "note editor Escape mapping should cancel")
+assert_equal(vim.api.nvim_get_mode().mode, "n", "cancelling the note editor should restore normal mode")
 
 local pending_namespace = vim.api.nvim_create_namespace("relay.pending_selection")
 

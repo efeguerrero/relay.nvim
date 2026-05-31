@@ -65,6 +65,7 @@ local function restore_window(session)
   if valid_window(session.parent_winid) then
     vim.api.nvim_set_current_win(session.parent_winid)
   end
+  vim.cmd("stopinsert")
 end
 
 local function finish(session, value, close_window)
