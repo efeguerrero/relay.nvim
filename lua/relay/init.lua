@@ -4,6 +4,7 @@ local export = require("relay.export")
 local navigation = require("relay.navigation")
 local preview = require("relay.preview")
 local quickfix = require("relay.quickfix")
+local selection = require("relay.selection")
 local ui = require("relay.ui")
 local utils = require("relay.utils")
 
@@ -24,11 +25,16 @@ function M.add(note)
     return id
   end
 
+  local range = selection.visual_range()
+  local highlight = selection.highlight(range)
   ui.input("Relay note: ", "", function(value)
-    local id = annotations.create_from_visual(value)
+    selection.clear_highlight(highlight)
+    local id = annotations.create(range, value)
     if id then
       utils.notify("Annotation added")
     end
+  end, function()
+    selection.clear_highlight(highlight)
   end)
 end
 

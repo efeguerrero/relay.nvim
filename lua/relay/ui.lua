@@ -62,9 +62,12 @@ function M.extmark_opts(note)
   return extmark_opts
 end
 
-function M.input(prompt, default, callback)
+function M.input(prompt, default, callback, on_cancel)
   vim.ui.input({ prompt = prompt, default = default or "" }, function(value)
     if value == nil then
+      if on_cancel then
+        on_cancel()
+      end
       return
     end
 

@@ -1,6 +1,7 @@
 local relay = require("relay")
 local annotations = relay.annotations
 local exporter = relay.exporter
+local selection = require("relay.selection")
 
 local failures = {}
 
@@ -38,6 +39,49 @@ local bufnr = fresh_buffer("fixture.lua", {
   "end",
   "return greet('relay')",
 }, "lua")
+
+local pending_namespace = vim.api.nvim_create_namespace("relay.pending_selection")
+local original_input = vim.ui.input
+local confirm_input
+vim.ui.input = function(_, callback)
+  confirm_input = callback
+end
+
+vim.fn.setpos("'<", { bufnr, 99, 1, 0 })
+vim.fn.setpos("'>", { bufnr, 99, 1, 0 })
+vim.api.nvim_win_set_cursor(0, { 1, 0 })
+vim.api.nvim_create_user_command("RelayTestAdd", function()
+  relay.add()
+end, {})
+vim.keymap.set("x", "x", "<cmd>RelayTestAdd<cr>")
+vim.api.nvim_feedkeys("vjx", "xt", false)
+vim.keymap.del("x", "x")
+vim.api.nvim_del_user_command("RelayTestAdd")
+local pending = vim.api.nvim_buf_get_extmarks(bufnr, pending_namespace, 0, -1, { details = true })
+assert_equal(#pending, 1, "interactive add should highlight the pending visual selection")
+assert_equal(pending[1][4].hl_group, "Visual", "pending selection should use the visual highlight")
+assert_equal(pending[1][2], 0, "interactive add should use the current visual selection start")
+assert_equal(pending[1][4].end_row, 1, "interactive add should use the current visual selection end")
+assert_equal(#annotations.all(bufnr), 0, "pending selection should not create an annotation before confirmation")
+confirm_input(nil)
+assert_equal(#vim.api.nvim_buf_get_extmarks(bufnr, pending_namespace, 0, -1, {}), 0, "cancel should clear pending selection highlight")
+assert_equal(#annotations.all(bufnr), 0, "cancel should not create an annotation")
+
+vim.fn.setpos("'<", { bufnr, 1, 1, 0 })
+vim.fn.setpos("'>", { bufnr, 1, 5, 0 })
+relay.add()
+assert_equal(#vim.api.nvim_buf_get_extmarks(bufnr, pending_namespace, 0, -1, {}), 1, "interactive add should restore pending selection highlight")
+confirm_input("interactive note")
+assert_equal(#vim.api.nvim_buf_get_extmarks(bufnr, pending_namespace, 0, -1, {}), 0, "confirmation should clear pending selection highlight")
+assert_equal(annotations.all(bufnr)[1].note, "interactive note", "confirmation should create the selected annotation")
+annotations.clear(bufnr)
+vim.ui.input = original_input
+
+vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "xt", false)
+vim.fn.setpos("'<", { bufnr, 1, 1, 0 })
+vim.fn.setpos("'>", { bufnr, 99, 1, 0 })
+local clamped = selection.visual_range(bufnr)
+assert_equal(clamped.end_row, 3, "visual range should clamp stale marks to the current buffer")
 
 local id = annotations.create({
   bufnr = bufnr,
