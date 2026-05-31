@@ -42,6 +42,7 @@ require("relay").setup({
 | `:RelayNext` | Jump to the next annotation. |
 | `:RelayPrev` | Jump to the previous annotation. |
 | `:RelayPreview` | Open a read-only floating preview of the generated markdown. |
+| `:RelayQuickfix` | Add all annotations to the quickfix list. |
 | `:RelayExport` | Export annotations to markdown and copy the path to the clipboard. |
 
 ## Default Keymaps
@@ -55,6 +56,7 @@ vim.keymap.set("n", "<leader>rt", "<cmd>RelayToggleText<cr>")
 vim.keymap.set("n", "]r", "<cmd>RelayNext<cr>")
 vim.keymap.set("n", "[r", "<cmd>RelayPrev<cr>")
 vim.keymap.set("n", "<leader>rp", "<cmd>RelayPreview<cr>")
+vim.keymap.set("n", "<leader>cr", "<cmd>RelayQuickfix<cr>")
 vim.keymap.set("n", "<leader>rx", "<cmd>RelayExport<cr>")
 ```
 
@@ -65,6 +67,8 @@ Set `keymaps = false` to skip default mappings.
 Exports are written to `.relay/context.md` in the current working directory by default. Each export overwrites that file instead of creating timestamped markdown files.
 
 `:RelayPreview` renders the current annotations in a read-only floating buffer without writing the export file. Use `q` to close the preview. `:RelayExport` writes the generated markdown file and copies its path to the clipboard.
+
+`:RelayQuickfix` replaces the current quickfix list with all loaded Relay annotations. Use `:cnext` and `:cprev` to cycle through them, or `:copen` to inspect the list.
 
 Run the headless test suite:
 

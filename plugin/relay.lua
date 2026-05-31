@@ -41,6 +41,10 @@ vim.api.nvim_create_user_command("RelayPreview", function()
   relay.preview()
 end, { desc = "Preview Relay annotations as markdown" })
 
+vim.api.nvim_create_user_command("RelayQuickfix", function()
+  relay.quickfix()
+end, { desc = "Add Relay references to the quickfix list" })
+
 vim.api.nvim_create_user_command("RelayDebug", function()
   relay.debug()
 end, { desc = "Print Relay annotation debug state" })

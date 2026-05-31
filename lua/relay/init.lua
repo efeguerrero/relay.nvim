@@ -3,6 +3,7 @@ local config = require("relay.config")
 local export = require("relay.export")
 local navigation = require("relay.navigation")
 local preview = require("relay.preview")
+local quickfix = require("relay.quickfix")
 local ui = require("relay.ui")
 local utils = require("relay.utils")
 
@@ -99,6 +100,12 @@ function M.preview()
   return preview.open()
 end
 
+function M.quickfix()
+  local items = quickfix.populate()
+  utils.notify(("%d Relay references added to quickfix"):format(#items))
+  return items
+end
+
 function M.debug()
   local state = navigation.debug_state()
   print(vim.inspect(state))
@@ -109,5 +116,6 @@ M.annotations = annotations
 M.exporter = export
 M.navigation = navigation
 M.previewer = preview
+M.quickfix_list = quickfix
 
 return M
