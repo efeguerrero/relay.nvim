@@ -1,6 +1,7 @@
 local relay = require("relay")
 local annotations = relay.annotations
 local exporter = relay.exporter
+local note_editor = relay.note_editor
 local selection = require("relay.selection")
 
 local failures = {}
@@ -40,12 +41,37 @@ local bufnr = fresh_buffer("fixture.lua", {
   "return greet('relay')",
 }, "lua")
 
+local submitted_note
+note_editor.open({
+  on_submit = function(value)
+    submitted_note = value
+  end,
+})
+vim.schedule(function()
+  vim.api.nvim_feedkeys("ifirst" .. vim.keycode("<S-CR>") .. "second" .. vim.keycode("<CR>"), "xt", false)
+end)
+vim.wait(100, function()
+  return submitted_note ~= nil
+end)
+assert_equal(submitted_note, "first\nsecond", "note editor mappings should insert newlines and submit")
+assert_equal(note_editor.state(), nil, "submitting through Enter should close the note editor")
+
+local cancelled_note = false
+note_editor.open({
+  on_submit = function() end,
+  on_cancel = function()
+    cancelled_note = true
+  end,
+})
+vim.schedule(function()
+  vim.api.nvim_feedkeys("i" .. vim.keycode("<Esc>"), "xt", false)
+end)
+vim.wait(100, function()
+  return cancelled_note
+end)
+assert_equal(cancelled_note, true, "note editor Escape mapping should cancel")
+
 local pending_namespace = vim.api.nvim_create_namespace("relay.pending_selection")
-local original_input = vim.ui.input
-local confirm_input
-vim.ui.input = function(_, callback)
-  confirm_input = callback
-end
 
 vim.fn.setpos("'<", { bufnr, 99, 1, 0 })
 vim.fn.setpos("'>", { bufnr, 99, 1, 0 })
@@ -57,25 +83,59 @@ vim.keymap.set("x", "x", "<cmd>RelayTestAdd<cr>")
 vim.api.nvim_feedkeys("vjx", "xt", false)
 vim.keymap.del("x", "x")
 vim.api.nvim_del_user_command("RelayTestAdd")
+local editor = note_editor.state()
 local pending = vim.api.nvim_buf_get_extmarks(bufnr, pending_namespace, 0, -1, { details = true })
+assert_truthy(editor, "interactive add should open the note editor")
+assert_truthy(vim.api.nvim_win_is_valid(editor.winid), "note editor should open a floating window")
+assert_truthy(vim.api.nvim_buf_is_valid(editor.bufnr), "note editor should use a scratch buffer")
+assert_equal(vim.bo[editor.bufnr].buftype, "prompt", "note editor should use prompt buffer semantics")
+assert_equal(vim.bo[editor.bufnr].filetype, "relay_note", "note editor should expose a dedicated filetype")
+assert_truthy(vim.api.nvim_win_get_config(editor.winid).footer, "note editor should display control hints")
+assert_truthy(vim.fn.maparg("<CR>", "i", false, true).callback, "note editor should map Enter to save")
+assert_truthy(vim.fn.maparg("<Esc>", "i", false, true).callback, "note editor should map Escape to cancel")
+assert_truthy(vim.fn.maparg("<C-c>", "i", false, true).callback, "note editor should map Ctrl-C to cancel")
 assert_equal(#pending, 1, "interactive add should highlight the pending visual selection")
 assert_equal(pending[1][4].hl_group, "Visual", "pending selection should use the visual highlight")
 assert_equal(pending[1][2], 0, "interactive add should use the current visual selection start")
 assert_equal(pending[1][4].end_row, 1, "interactive add should use the current visual selection end")
 assert_equal(#annotations.all(bufnr), 0, "pending selection should not create an annotation before confirmation")
-confirm_input(nil)
+note_editor.cancel()
 assert_equal(#vim.api.nvim_buf_get_extmarks(bufnr, pending_namespace, 0, -1, {}), 0, "cancel should clear pending selection highlight")
 assert_equal(#annotations.all(bufnr), 0, "cancel should not create an annotation")
+assert_equal(note_editor.state(), nil, "cancel should close the note editor")
 
 vim.fn.setpos("'<", { bufnr, 1, 1, 0 })
 vim.fn.setpos("'>", { bufnr, 1, 5, 0 })
 relay.add()
+editor = note_editor.state()
 assert_equal(#vim.api.nvim_buf_get_extmarks(bufnr, pending_namespace, 0, -1, {}), 1, "interactive add should restore pending selection highlight")
-confirm_input("interactive note")
+local initial_height = vim.api.nvim_win_get_config(editor.winid).height
+vim.api.nvim_buf_set_lines(editor.bufnr, 0, -1, false, {
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+})
+vim.api.nvim_exec_autocmds("TextChanged", { buffer = editor.bufnr })
+assert_truthy(vim.api.nvim_win_get_config(editor.winid).height > initial_height, "note editor should grow downward for multiline input")
+vim.api.nvim_buf_set_lines(editor.bufnr, 0, -1, false, { "interactive", "note" })
+note_editor.submit()
 assert_equal(#vim.api.nvim_buf_get_extmarks(bufnr, pending_namespace, 0, -1, {}), 0, "confirmation should clear pending selection highlight")
-assert_equal(annotations.all(bufnr)[1].note, "interactive note", "confirmation should create the selected annotation")
+assert_equal(annotations.all(bufnr)[1].note, "interactive\nnote", "confirmation should create a multiline annotation")
 annotations.clear(bufnr)
-vim.ui.input = original_input
+
+relay.add()
+editor = note_editor.state()
+vim.api.nvim_win_close(editor.winid, true)
+vim.wait(100, function()
+  return note_editor.state() == nil
+end)
+assert_equal(note_editor.state(), nil, "closing the editor window should clean up its state")
+assert_equal(#vim.api.nvim_buf_get_extmarks(bufnr, pending_namespace, 0, -1, {}), 0, "closing the editor window should clear pending highlight")
 
 vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "xt", false)
 vim.fn.setpos("'<", { bufnr, 1, 1, 0 })
@@ -113,6 +173,10 @@ assert_equal(found_by_line.id, id, "line-based lookup should find the multiline 
 
 relay.edit("return a table")
 assert_equal(annotations.all(bufnr)[1].note, "return a table", "edit should update metadata")
+relay.edit()
+editor = note_editor.state()
+assert_equal(vim.api.nvim_buf_get_lines(editor.bufnr, 0, -1, false)[1], "return a table", "edit should prefill the current note")
+note_editor.cancel()
 
 local enabled = relay.toggle_text()
 assert_equal(enabled, true, "toggle should enable annotation text")

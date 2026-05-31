@@ -7,6 +7,12 @@ M.defaults = {
   sign_text = "*",
   show_virtual_text = false,
   keymaps = true,
+  note_editor = {
+    width = 0.6,
+    min_height = 6,
+    max_height = 0.4,
+    border = "rounded",
+  },
   preview = {
     width = 0.8,
     height = 0.8,

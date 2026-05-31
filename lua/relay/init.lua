@@ -2,6 +2,7 @@ local annotations = require("relay.annotations")
 local config = require("relay.config")
 local export = require("relay.export")
 local navigation = require("relay.navigation")
+local note_editor = require("relay.note_editor")
 local preview = require("relay.preview")
 local quickfix = require("relay.quickfix")
 local selection = require("relay.selection")
@@ -27,15 +28,18 @@ function M.add(note)
 
   local range = selection.visual_range()
   local highlight = selection.highlight(range)
-  ui.input("Relay note: ", "", function(value)
-    selection.clear_highlight(highlight)
-    local id = annotations.create(range, value)
-    if id then
-      utils.notify("Annotation added")
-    end
-  end, function()
-    selection.clear_highlight(highlight)
-  end)
+  note_editor.open({
+    on_submit = function(value)
+      selection.clear_highlight(highlight)
+      local id = annotations.create(range, value)
+      if id then
+        utils.notify("Annotation added")
+      end
+    end,
+    on_cancel = function()
+      selection.clear_highlight(highlight)
+    end,
+  })
 end
 
 function M.edit(note)
@@ -51,10 +55,13 @@ function M.edit(note)
     return annotation.id
   end
 
-  ui.input("Relay note: ", annotation.note, function(value)
-    annotations.update(annotation, value)
-    utils.notify("Annotation updated")
-  end)
+  note_editor.open({
+    default = annotation.note,
+    on_submit = function(value)
+      annotations.update(annotation, value)
+      utils.notify("Annotation updated")
+    end,
+  })
 end
 
 function M.delete()
@@ -121,6 +128,7 @@ end
 M.annotations = annotations
 M.exporter = export
 M.navigation = navigation
+M.note_editor = note_editor
 M.previewer = preview
 M.quickfix_list = quickfix
 

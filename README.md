@@ -22,6 +22,12 @@ require("relay").setup({
   show_virtual_text = false,
   sign_text = "*",
   keymaps = true,
+  note_editor = {
+    width = 0.6,
+    min_height = 6,
+    max_height = 0.4,
+    border = "rounded",
+  },
   preview = {
     width = 0.8,
     height = 0.8,
@@ -69,6 +75,9 @@ Exports are written to `.relay/context.md` in the current working directory by d
 `:RelayPreview` renders the current annotations in a read-only floating buffer without writing the export file. Use `q` to close the preview. `:RelayExport` writes the generated markdown file and copies its path to the clipboard.
 
 `:RelayQuickfix` replaces the current quickfix list with all loaded Relay annotations. Use `:cnext` and `:cprev` to cycle through them, or `:copen` to inspect the list.
+
+Relay notes open in a multiline floating editor. Press `Enter` to save, `Shift-Enter` to insert a newline, or `Esc` / `Ctrl-C` to cancel.
+The editor uses the `relay_note` filetype so completion providers can exclude it when needed.
 
 Run the headless test suite:
 
