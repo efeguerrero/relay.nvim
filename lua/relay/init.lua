@@ -2,6 +2,7 @@ local annotations = require("relay.annotations")
 local config = require("relay.config")
 local export = require("relay.export")
 local navigation = require("relay.navigation")
+local preview = require("relay.preview")
 local ui = require("relay.ui")
 local utils = require("relay.utils")
 
@@ -94,6 +95,10 @@ function M.export()
   return path
 end
 
+function M.preview()
+  return preview.open()
+end
+
 function M.debug()
   local state = navigation.debug_state()
   print(vim.inspect(state))
@@ -103,5 +108,6 @@ end
 M.annotations = annotations
 M.exporter = export
 M.navigation = navigation
+M.previewer = preview
 
 return M

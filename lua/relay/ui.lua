@@ -84,6 +84,7 @@ function M.keymaps()
   vim.keymap.set("n", "<leader>rt", "<cmd>RelayToggleText<cr>", { desc = "Relay toggle inline text" })
   vim.keymap.set("n", "]r", "<cmd>RelayNext<cr>", { desc = "Relay next annotation" })
   vim.keymap.set("n", "[r", "<cmd>RelayPrev<cr>", { desc = "Relay previous annotation" })
+  vim.keymap.set("n", "<leader>rp", "<cmd>RelayPreview<cr>", { desc = "Relay preview context" })
   vim.keymap.set("n", "<leader>rx", "<cmd>RelayExport<cr>", { desc = "Relay export annotations" })
 end
 

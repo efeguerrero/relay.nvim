@@ -7,6 +7,11 @@ M.defaults = {
   sign_text = "*",
   show_virtual_text = false,
   keymaps = true,
+  preview = {
+    width = 0.8,
+    height = 0.8,
+    border = "rounded",
+  },
 }
 
 M.options = vim.deepcopy(M.defaults)
