@@ -261,6 +261,36 @@ local path = relay.export()
 assert_truthy(vim.fn.filereadable(path) == 1, "export should write a markdown file")
 assert_truthy(path:find("/tmp/context%.md$") ~= nil, "export should use the stable context filename")
 
+local original_has = vim.fn.has
+local original_list_uis = vim.api.nvim_list_uis
+local original_setreg = vim.fn.setreg
+local original_notify = vim.notify
+local notification
+local copied_register
+vim.fn.has = function() return 1 end
+vim.api.nvim_list_uis = function() return { {} } end
+vim.notify = function(message) notification = message end
+vim.fn.setreg = function(register)
+  if register == "+" then copied_register = register end
+end
+assert_equal(relay.export(), path, "export should still return the path after copying")
+assert_equal(copied_register, "+", "export should copy the path to the clipboard")
+assert_equal(notification, "Relay context exported: " .. path .. " (path copied to clipboard)", "export should confirm a successful clipboard copy")
+
+vim.fn.setreg = function(register)
+  if register == "+" then error("clipboard unavailable") end
+end
+relay.export()
+assert_equal(notification, "Relay context exported: " .. path .. " (path not copied to clipboard)", "export should not claim a failed clipboard copy succeeded")
+
+vim.api.nvim_list_uis = function() return {} end
+relay.export()
+assert_equal(notification, "Relay context exported: " .. path .. " (path not copied to clipboard)", "headless export should not claim a clipboard copy")
+vim.fn.has = original_has
+vim.api.nvim_list_uis = original_list_uis
+vim.fn.setreg = original_setreg
+vim.notify = original_notify
+
 vim.fn.writefile({ "existing export" }, path)
 local preview_win = relay.preview()
 local preview_buf = vim.api.nvim_win_get_buf(preview_win)

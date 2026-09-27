@@ -104,8 +104,9 @@ function M.prev()
 end
 
 function M.export()
-  local path = export.write()
-  utils.notify("Relay context exported: " .. path)
+  local path, copied = export.write()
+  local status = copied and "path copied to clipboard" or "path not copied to clipboard"
+  utils.notify(("Relay context exported: %s (%s)"):format(path, status))
   return path
 end
 

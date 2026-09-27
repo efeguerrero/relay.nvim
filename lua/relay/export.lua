@@ -65,11 +65,12 @@ function M.write()
   file:write(M.generate())
   file:close()
 
+  local copied = false
   if vim.fn.has("clipboard") == 1 and #vim.api.nvim_list_uis() > 0 then
-    pcall(vim.fn.setreg, "+", path)
+    copied = pcall(vim.fn.setreg, "+", path)
   end
   pcall(vim.fn.setreg, '"', path)
-  return path
+  return path, copied
 end
 
 return M

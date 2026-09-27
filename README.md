@@ -72,7 +72,7 @@ Set `keymaps = false` to skip default mappings.
 
 Exports are written to `.relay/context.md` in the current working directory by default. Each export overwrites that file instead of creating timestamped markdown files.
 
-`:RelayPreview` renders the current annotations in a read-only floating buffer without writing the export file. Use `q` to close the preview. `:RelayExport` writes the generated markdown file and copies its path to the clipboard.
+`:RelayPreview` renders the current annotations in a read-only floating buffer without writing the export file. Use `q` to close the preview. `:RelayExport` writes the generated markdown file, attempts to copy its path to the clipboard, and reports whether the copy succeeded in its notification.
 
 `:RelayQuickfix` replaces the current quickfix list with all loaded Relay annotations. Use `:cnext` and `:cprev` to cycle through them, or `:copen` to inspect the list.
 
