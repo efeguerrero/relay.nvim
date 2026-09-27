@@ -77,6 +77,7 @@ function M.keymaps()
   vim.keymap.set("n", "<leader>rp", "<cmd>RelayPreview<cr>", { desc = "Relay preview context" })
   vim.keymap.set("n", "<leader>cr", "<cmd>RelayQuickfix<cr>", { desc = "Relay add references to quickfix" })
   vim.keymap.set("n", "<leader>rx", "<cmd>RelayExport<cr>", { desc = "Relay export annotations" })
+  vim.keymap.set("n", "<leader>rc", "<cmd>RelayCopy<cr>", { desc = "Relay copy context" })
 end
 
 return M

@@ -37,6 +37,10 @@ vim.api.nvim_create_user_command("RelayExport", function()
   relay.export()
 end, { desc = "Export Relay annotations to markdown" })
 
+vim.api.nvim_create_user_command("RelayCopy", function()
+  relay.copy()
+end, { desc = "Copy Relay context markdown to clipboard" })
+
 vim.api.nvim_create_user_command("RelayPreview", function()
   relay.preview()
 end, { desc = "Preview Relay annotations as markdown" })

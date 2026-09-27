@@ -286,6 +286,37 @@ assert_equal(notification, "Relay context exported: " .. path .. " (path not cop
 vim.api.nvim_list_uis = function() return {} end
 relay.export()
 assert_equal(notification, "Relay context exported: " .. path .. " (path not copied to clipboard)", "headless export should not claim a clipboard copy")
+
+os.remove(path)
+local copied_text
+local notification_level
+vim.api.nvim_list_uis = function() return { {} } end
+vim.fn.setreg = function(register, value)
+  assert_equal(register, "+", "copy should use the system clipboard register")
+  copied_text = value
+end
+vim.notify = function(message, level)
+  notification = message
+  notification_level = level
+end
+assert_equal(relay.copy(), true, "copy should report clipboard success")
+assert_equal(copied_text, exporter.generate(), "copy should use the same markdown as preview and export")
+assert_equal(notification, "Relay context copied to clipboard", "copy should confirm clipboard success")
+assert_equal(vim.fn.filereadable(path), 0, "copy should not create an export file")
+
+copied_text = nil
+vim.cmd("RelayCopy")
+assert_equal(copied_text, exporter.generate(), "RelayCopy command should copy generated markdown")
+
+vim.fn.setreg = function() error("clipboard unavailable") end
+assert_equal(relay.copy(), false, "copy should report clipboard failure")
+assert_equal(notification, "Relay context not copied: clipboard unavailable", "copy should warn when clipboard fails")
+assert_equal(notification_level, vim.log.levels.WARN, "copy failure should use warning level")
+
+vim.api.nvim_list_uis = function() return {} end
+assert_equal(relay.copy(), false, "copy should report an unavailable UI")
+assert_equal(notification, "Relay context not copied: clipboard unavailable", "headless copy should not claim success")
+assert_equal(vim.fn.filereadable(path), 0, "failed copy should not create an export file")
 vim.fn.has = original_has
 vim.api.nvim_list_uis = original_list_uis
 vim.fn.setreg = original_setreg

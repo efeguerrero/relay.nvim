@@ -58,6 +58,17 @@ function M.generate()
   return table.concat(lines, "\n")
 end
 
+local function copy_to_clipboard(text)
+  if vim.fn.has("clipboard") == 1 and #vim.api.nvim_list_uis() > 0 then
+    return pcall(vim.fn.setreg, "+", text)
+  end
+  return false
+end
+
+function M.copy()
+  return copy_to_clipboard(M.generate())
+end
+
 function M.write()
   utils.ensure_dir(config.options.export_dir)
   local path = ("%s/%s"):format(config.options.export_dir, config.options.export_filename)
@@ -65,10 +76,7 @@ function M.write()
   file:write(M.generate())
   file:close()
 
-  local copied = false
-  if vim.fn.has("clipboard") == 1 and #vim.api.nvim_list_uis() > 0 then
-    copied = pcall(vim.fn.setreg, "+", path)
-  end
+  local copied = copy_to_clipboard(path)
   pcall(vim.fn.setreg, '"', path)
   return path, copied
 end

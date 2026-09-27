@@ -50,6 +50,7 @@ require("relay").setup({
 | `:RelayPreview` | Open a read-only floating preview of the generated markdown. |
 | `:RelayQuickfix` | Add all annotations to the quickfix list. |
 | `:RelayExport` | Export annotations to markdown and copy the path to the clipboard. |
+| `:RelayCopy` | Copy the generated context markdown to the clipboard without writing a file. |
 
 ## Default Keymaps
 
@@ -64,6 +65,7 @@ vim.keymap.set("n", "[r", "<cmd>RelayPrev<cr>")
 vim.keymap.set("n", "<leader>rp", "<cmd>RelayPreview<cr>")
 vim.keymap.set("n", "<leader>cr", "<cmd>RelayQuickfix<cr>")
 vim.keymap.set("n", "<leader>rx", "<cmd>RelayExport<cr>")
+vim.keymap.set("n", "<leader>rc", "<cmd>RelayCopy<cr>")
 ```
 
 Set `keymaps = false` to skip default mappings.
@@ -72,7 +74,7 @@ Set `keymaps = false` to skip default mappings.
 
 Exports are written to `.relay/context.md` in the current working directory by default. Each export overwrites that file instead of creating timestamped markdown files.
 
-`:RelayPreview` renders the current annotations in a read-only floating buffer without writing the export file. Use `q` to close the preview. `:RelayExport` writes the generated markdown file, attempts to copy its path to the clipboard, and reports whether the copy succeeded in its notification.
+`:RelayPreview` renders the current annotations in a read-only floating buffer without writing the export file. Use `q` to close the preview. `:RelayExport` writes the generated markdown file, attempts to copy its path to the clipboard, and reports whether the copy succeeded in its notification. `:RelayCopy` copies that same generated markdown directly to the clipboard without creating or overwriting a file; it warns if the clipboard is unavailable.
 
 `:RelayQuickfix` replaces the current quickfix list with all loaded Relay annotations. Use `:cnext` and `:cprev` to cycle through them, or `:copen` to inspect the list.
 

@@ -110,6 +110,13 @@ function M.export()
   return path
 end
 
+function M.copy()
+  local copied = export.copy()
+  utils.notify(copied and "Relay context copied to clipboard" or "Relay context not copied: clipboard unavailable",
+    copied and vim.log.levels.INFO or vim.log.levels.WARN)
+  return copied
+end
+
 function M.preview()
   return preview.open()
 end
