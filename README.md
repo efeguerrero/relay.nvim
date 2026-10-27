@@ -50,6 +50,7 @@ require("relay").setup({
 | `:RelayPrev` | Jump to the previous annotation. |
 | `:RelayPreview` | Open a read-only floating preview of the generated markdown. |
 | `:RelayQuickfix` | Add all annotations to the quickfix list. |
+| `:RelayFzf` | Browse annotations with fzf-lua and jump to the selected location. |
 | `:RelayExport` | Export annotations to markdown and copy the path to the clipboard. |
 | `:RelayCopy` | Copy the generated context markdown to the clipboard without writing a file. |
 
@@ -69,7 +70,11 @@ vim.keymap.set("n", "<leader>rx", "<cmd>RelayExport<cr>")
 vim.keymap.set("n", "<leader>rc", "<cmd>RelayCopy<cr>")
 ```
 
-Set `keymaps = false` to skip default mappings.
+Set `keymaps = false` to skip default mappings. `:RelayFzf` requires [fzf-lua](https://github.com/ibhagwan/fzf-lua), but does not require it unless the command is used. `:RelayFzf` has no default keymap; add one yourself if desired:
+
+```lua
+vim.keymap.set("n", "<leader>rf", "<cmd>RelayFzf<cr>", { desc = "Browse Relay annotations with fzf-lua" })
+```
 
 ## Development
 

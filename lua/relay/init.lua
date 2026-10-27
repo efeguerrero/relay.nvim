@@ -1,6 +1,7 @@
 local annotations = require("relay.annotations")
 local config = require("relay.config")
 local export = require("relay.export")
+local fzf = require("relay.fzf")
 local navigation = require("relay.navigation")
 local note_editor = require("relay.note_editor")
 local preview = require("relay.preview")
@@ -135,6 +136,10 @@ function M.quickfix()
   return items
 end
 
+function M.fzf()
+  return fzf.open()
+end
+
 function M.debug()
   local state = navigation.debug_state()
   print(vim.inspect(state))
@@ -143,6 +148,7 @@ end
 
 M.annotations = annotations
 M.exporter = export
+M.fzf_picker = fzf
 M.navigation = navigation
 M.note_editor = note_editor
 M.previewer = preview

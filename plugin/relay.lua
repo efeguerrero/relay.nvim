@@ -49,6 +49,10 @@ vim.api.nvim_create_user_command("RelayQuickfix", function()
   relay.quickfix()
 end, { desc = "Add Relay references to the quickfix list" })
 
+vim.api.nvim_create_user_command("RelayFzf", function()
+  relay.fzf()
+end, { desc = "Browse Relay annotations with fzf-lua" })
+
 vim.api.nvim_create_user_command("RelayDebug", function()
   relay.debug()
 end, { desc = "Print Relay annotation debug state" })

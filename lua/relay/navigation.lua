@@ -114,11 +114,16 @@ local function prev_index(items)
   return #items
 end
 
-local function jump(annotation)
+function M.jump(annotation)
+  if not annotation or not vim.api.nvim_buf_is_valid(annotation.bufnr) then
+    return false
+  end
+
   if vim.api.nvim_get_current_buf() ~= annotation.bufnr then
     vim.api.nvim_set_current_buf(annotation.bufnr)
   end
   vim.api.nvim_win_set_cursor(0, { annotation.start_row + 1, annotation.start_col })
+  return true
 end
 
 function M.next()
@@ -129,7 +134,7 @@ function M.next()
 
   sort_annotations(items)
   local index = next_index(items)
-  jump(items[index])
+  M.jump(items[index])
   return items[index]
 end
 
@@ -141,7 +146,7 @@ function M.prev()
 
   sort_annotations(items)
   local index = prev_index(items)
-  jump(items[index])
+  M.jump(items[index])
   return items[index]
 end
 

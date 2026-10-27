@@ -387,4 +387,44 @@ assert_equal(relay.copy(), false, "copy failure with clear_after_copy should rep
 assert_equal(#annotations.all(), 1, "failed copy should preserve annotations")
 config.setup({ clear_after_copy = false })
 
+local fzf_module = require("relay.fzf")
+local original_fzf = package.loaded["fzf-lua"]
+local original_notify = vim.notify
+local picker_call
+package.loaded["fzf-lua"] = {
+  fzf_exec = function(entries, opts)
+    picker_call = { entries = entries, opts = opts }
+  end,
+}
+vim.api.nvim_set_current_buf(second)
+vim.cmd("RelayFzf")
+assert_truthy(picker_call, "RelayFzf command should invoke fzf-lua")
+assert_equal(#picker_call.entries, 1, "RelayFzf should create one entry per annotation")
+assert_truthy(picker_call.entries[1]:find("fixture.lua:1:1", 1, true), "RelayFzf entry should show file and location")
+assert_equal(picker_call.entries[1]:find("retain after failed copy", 1, true), nil, "RelayFzf entry should not show the note")
+assert_equal(picker_call.opts.prompt, "Relay annotations> ", "RelayFzf should identify its picker")
+assert_equal(picker_call.opts.previewer, "builtin", "RelayFzf should show the source file preview")
+assert_equal(picker_call.opts.fzf_opts, nil, "RelayFzf should not hide the file-location entries")
+picker_call.opts.actions.default({ picker_call.entries[1] })
+assert_equal(vim.api.nvim_get_current_buf(), bufnr, "RelayFzf Enter should switch to the annotation buffer")
+local fzf_cursor = vim.api.nvim_win_get_cursor(0)
+assert_equal(fzf_cursor[1], 1, "RelayFzf Enter should move to the annotation row")
+assert_equal(fzf_cursor[2], 0, "RelayFzf Enter should move to the annotation column")
+
+package.loaded["fzf-lua"] = nil
+package.preload["fzf-lua"] = function()
+  error("fzf-lua unavailable for test")
+end
+vim.notify = function(message)
+  notification = message
+end
+assert_equal(fzf_module.open(), false, "RelayFzf should fail cleanly when fzf-lua is missing")
+assert_equal(notification, "RelayFzf requires fzf-lua to be installed", "missing fzf-lua should be reported clearly")
+package.preload["fzf-lua"] = nil
+package.loaded["fzf-lua"] = original_fzf
+vim.notify = original_notify
+
+relay.setup({ keymaps = true })
+assert_equal(vim.fn.maparg("<leader>rf", "n"), "", "RelayFzf should not install a default keymap")
+
 finish()
