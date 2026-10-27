@@ -112,8 +112,16 @@ end
 
 function M.copy()
   local copied = export.copy()
-  utils.notify(copied and "Relay context copied to clipboard" or "Relay context not copied: clipboard unavailable",
-    copied and vim.log.levels.INFO or vim.log.levels.WARN)
+  local cleared = copied and config.options.clear_after_copy
+  if cleared then
+    annotations.clear()
+  end
+
+  local message = copied and "Relay context copied to clipboard" or "Relay context not copied: clipboard unavailable"
+  if cleared then
+    message = message .. " (annotations cleared)"
+  end
+  utils.notify(message, copied and vim.log.levels.INFO or vim.log.levels.WARN)
   return copied
 end
 

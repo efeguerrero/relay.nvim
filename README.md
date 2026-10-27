@@ -20,6 +20,7 @@ require("relay").setup({
   export_filename = "context.md",
   highlight_group = "RelayAnnotation",
   show_virtual_text = false,
+  clear_after_copy = false,
   sign_text = "*",
   keymaps = true,
   note_editor = {
@@ -74,7 +75,7 @@ Set `keymaps = false` to skip default mappings.
 
 Exports are written to `.relay/context.md` in the current working directory by default. Each export overwrites that file instead of creating timestamped markdown files.
 
-`:RelayPreview` renders the current annotations in a read-only floating buffer without writing the export file. Use `q` to close the preview. `:RelayExport` writes the generated markdown file, attempts to copy its path to the clipboard, and reports whether the copy succeeded in its notification. `:RelayCopy` copies that same generated markdown directly to the clipboard without creating or overwriting a file; it warns if the clipboard is unavailable.
+`:RelayPreview` renders the current annotations in a read-only floating buffer without writing the export file. Use `q` to close the preview. `:RelayExport` writes the generated markdown file, attempts to copy its path to the clipboard, and reports whether the copy succeeded in its notification. `:RelayCopy` copies that same generated markdown directly to the clipboard without creating or overwriting a file; it warns if the clipboard is unavailable. Set `clear_after_copy = true` to remove all Relay annotations from loaded buffers after a successful copy. Annotations are kept if the copy fails.
 
 `:RelayQuickfix` replaces the current quickfix list with all loaded Relay annotations. Use `:cnext` and `:cprev` to cycle through them, or `:copen` to inspect the list.
 

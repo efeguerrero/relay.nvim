@@ -6,6 +6,7 @@ M.defaults = {
   highlight_group = "RelayAnnotation",
   sign_text = "*",
   show_virtual_text = false,
+  clear_after_copy = false,
   keymaps = true,
   note_editor = {
     width = 0.6,

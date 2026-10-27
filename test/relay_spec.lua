@@ -299,7 +299,9 @@ vim.notify = function(message, level)
   notification = message
   notification_level = level
 end
+local annotation_count_before_copy = #annotations.all()
 assert_equal(relay.copy(), true, "copy should report clipboard success")
+assert_equal(#annotations.all(), annotation_count_before_copy, "copy should preserve annotations by default")
 assert_equal(copied_text, exporter.generate(), "copy should use the same markdown as preview and export")
 assert_equal(notification, "Relay context copied to clipboard", "copy should confirm clipboard success")
 assert_equal(vim.fn.filereadable(path), 0, "copy should not create an export file")
@@ -351,5 +353,38 @@ relay.clear()
 assert_equal(#annotations.all(), 0, "clear should remove every annotation")
 assert_equal(#relay.quickfix(), 0, "quickfix should support clearing the list when no annotations remain")
 assert_equal(#vim.fn.getqflist(), 0, "empty quickfix population should clear existing entries")
+
+local config = require("relay.config")
+config.setup({ clear_after_copy = true })
+vim.fn.has = function() return 1 end
+vim.api.nvim_list_uis = function() return { {} } end
+vim.fn.setreg = function(register)
+  assert_equal(register, "+", "copy should use the system clipboard register")
+end
+vim.notify = function(message)
+  notification = message
+end
+annotations.create({
+  bufnr = bufnr,
+  start_row = 0,
+  start_col = 0,
+  end_row = 0,
+  end_col = 5,
+}, "clear after successful copy")
+assert_equal(relay.copy(), true, "copy with clear_after_copy should report success")
+assert_equal(#annotations.all(), 0, "successful copy should clear all loaded-buffer annotations")
+assert_equal(notification, "Relay context copied to clipboard (annotations cleared)", "successful clear-after-copy should be reported")
+
+annotations.create({
+  bufnr = bufnr,
+  start_row = 0,
+  start_col = 0,
+  end_row = 0,
+  end_col = 5,
+}, "retain after failed copy")
+vim.fn.setreg = function() error("clipboard unavailable") end
+assert_equal(relay.copy(), false, "copy failure with clear_after_copy should report failure")
+assert_equal(#annotations.all(), 1, "failed copy should preserve annotations")
+config.setup({ clear_after_copy = false })
 
 finish()
